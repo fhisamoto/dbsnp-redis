@@ -50,7 +50,7 @@ class ChrSnp
   end
 
   def bucket_index_for(chr_pos)
-    ( (chr_pos - @min).to_f / @width ).floor
+    ( @num_buckets * (chr_pos - @min).to_f / (@max - @min) ).floor
   end
 end
 
