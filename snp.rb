@@ -15,7 +15,7 @@ class Snp < OpenStruct
       if chr_pos.is_a?(Array)
         chr_pos.each { |p| r << get_by_chr_pos(key, p) }
       elsif chr_pos.is_a?(Range)
-        r = ChrSnp.load(key).in(chr_pos).map { |i| self.new(to_params(i)) }
+        r += ChrSnp.load(key).in(chr_pos).map { |i| self.new(to_params(i)) }
       else
         r << get_by_chr_pos(key, chr_pos)
       end
