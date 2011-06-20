@@ -22,20 +22,30 @@ class ChrSnp
     @num_buckets = num_buckets
     @width = (@max - @min) / @num_buckets
     
-    @buckets = []
-    @num_buckets.times.each { |i| @buckets << "#{key_prefix}:b#{i}" }
-    
-    self
+    @buckets = []; @chr_pos_values = []
+    @num_buckets.times.each do |i|
+      @buckets << "#{key_prefix}:b#{i}"
+      @chr_pos_values  << @min + @width * i
+    end
   end
 
   def <<(val)
     chr_pos, value = val
-    REDIS.zadd get_key(chr_pos), chr_pos, value
+    key = get_key(chr_pos)
+    REDIS.zadd(key, chr_pos, value) if key
   end
 
   def [](chr_pos)
     key = get_key(chr_pos)
     REDIS.zrangebyscore(key, chr_pos, chr_pos + 1, :with_scores => true).first
+  end
+
+  def in(range)
+    a = bucket_index_for(range.first)
+    b = bucket_index_for(range.last)
+    ret = []
+    (a..b).each { |i| ret += REDIS.zrangebyscore(@buckets[i], range.first, range.last) }
+    ret
   end
 
   def create_info
