@@ -32,12 +32,12 @@ class ChrSnp
   def <<(val)
     chr_pos, value = val
     key = get_key(chr_pos)
-    REDIS.zadd(key, chr_pos, value) if key
+    APP_CONFIG.redis.zadd(key, chr_pos, value) if key
   end
 
   def [](chr_pos)
     key = get_key(chr_pos)
-    REDIS.zrangebyscore(key, chr_pos, chr_pos + 1, :with_scores => true).first
+    APP_CONFIG.redis.zrangebyscore(key, chr_pos, chr_pos + 1, :with_scores => true).first
   end
 
   def in(range)
@@ -50,7 +50,7 @@ class ChrSnp
 
   def create_info
     attributes = [ 'key_prefix', @key_prefix, 'min', @min, 'max', @max, 'num_buckets', @num_buckets, 'width', @width ]
-    REDIS.hmset(@key_info, *attributes)
+    APP_CONFIG.redis.hmset(@key_info, *attributes)
   end
 
   private
