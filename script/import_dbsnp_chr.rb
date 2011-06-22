@@ -1,9 +1,4 @@
-require 'redis'
-
-REDIS = Redis.new
-
-require File.expand_path(File.dirname(__FILE__) + '/../lib/chr_snp')
-require File.expand_path(File.dirname(__FILE__) + '/../lib/db_snp_importer')
+require File.expand_path(File.dirname(__FILE__) + '/../application')
 
 def import_file(file_name, key_prefix, max_chr_pos)
   importer = DbSnpImporter.new(file_name)

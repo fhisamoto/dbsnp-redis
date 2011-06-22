@@ -1,5 +1,4 @@
 require 'ostruct'
-require './chr_snp'
 
 class Snp < OpenStruct
   
