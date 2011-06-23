@@ -20,7 +20,7 @@ class ChrSnp
   def self.load(key_prefix)
     h = APP_CONFIG.redis.hgetall "#{key_prefix}:info"
     raise "ChrSnp info not found" if h.empty?
-    return self.new h['key_prefix'], h['min'].to_i, h['max'].to_i, h['num_buckets'].to_i
+    return self.new(h['key_prefix'], h['min'].to_i, h['max'].to_i, h['num_buckets'].to_i)
   end
 
   def self.create(key_prefix, min, max, num_buckets = DEFAULT_NUM_BUCKETS)
@@ -37,14 +37,17 @@ class ChrSnp
 
   def [](chr_pos)
     key = get_key(chr_pos)
-    APP_CONFIG.redis.zrangebyscore(key, chr_pos, chr_pos + 1, :with_scores => true).first
+    raw_snp = APP_CONFIG.redis.zrangebyscore(key, chr_pos, chr_pos + 1, :with_scores => true).first
+    new_snp(raw_snp)
   end
 
   def in(range)
-    a = bucket_index_for(range.first)
-    b = bucket_index_for(range.last)
     ret = []
-    (a..b).each { |i| ret += REDIS.zrangebyscore(@buckets[i], range.first, range.last) }
+    a, b = bucket_index_for(range.first), bucket_index_for(range.last)
+    (a..b).each do |i| 
+      raw_snps = REDIS.zrangebyscore(@buckets[i], range.first, range.last)
+      ret += raw_snps.map { |raw_snp| new_snp(raw_snp) }
+    end
     ret
   end
 
@@ -61,6 +64,10 @@ class ChrSnp
 
   def bucket_index_for(chr_pos)
     ( @num_buckets * (chr_pos - @min).to_f / (@max - @min) ).floor
+  end
+  
+  def new_snp(raw_snp)
+    Snp.new(*raw_snp.split(","))
   end
 end
 
