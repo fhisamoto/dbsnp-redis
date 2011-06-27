@@ -1,4 +1,4 @@
-class ChrSnp
+class DbSnpChromossome
   DEFAULT_NUM_BUCKETS = 10000
 
   def initialize(key_prefix, min, max, num_buckets)
@@ -45,7 +45,7 @@ class ChrSnp
     ret = []
     a, b = bucket_index_for(range.first), bucket_index_for(range.last)
     (a..b).each do |i| 
-      raw_snps = REDIS.zrangebyscore(@buckets[i], range.first, range.last)
+      raw_snps = APP_CONFIG.redis.zrangebyscore(@buckets[i], range.first, range.last)
       ret += raw_snps.map { |raw_snp| new_snp(raw_snp) }
     end
     ret
